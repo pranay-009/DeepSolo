@@ -21,7 +21,7 @@ from adet.config import get_cfg
 
 # constants
 WINDOW_NAME = "COCO detections"
-
+SYM_MODEL_PATH="/content/drive/MyDrive/ReID/siam-tr-state-dict.pt"
 
 def setup_cfg(args):
     # load config from file and command-line arguments
@@ -79,7 +79,7 @@ if __name__ == "__main__":
         df=pd.read_csv(args.input[0])
         img_path="/content/drive/MyDrive/ReID/Samples/UFPR"
         msk_path="/content/drive/MyDrive/ReID/Samples/UFPR"
-        model=fetch_symmetry_model("/content/drive/MyDrive/ReID/siam-tr-state-dict.pt")
+        model=fetch_symmetry_model(SYM_MODEL_PATH)
         acc_score,char_error=evaluate_without_siamese(df,img_path,msk_path,demo)
         print("accuracy and cer without symmetry",acc_score,char_error)
         print("accuracy and cer with symmetry",evaluate_with_siames(df,img_path,msk_path,demo,model))
