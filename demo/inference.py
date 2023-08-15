@@ -2,11 +2,13 @@ import argparse
 import glob
 import multiprocessing as mp
 import os
+from timm.models.layers import DropPath, to_2tuple, trunc_normal_
 import time
 import pandas as pd
 import cv2
+import torch
 import tqdm
-f#rom symmetry import *
+#from symmetry import *
 from detectron2.data.detection_utils import read_image
 from detectron2.utils.logger import setup_logger
 from extract import *
@@ -44,14 +46,9 @@ def get_parser():
         metavar="FILE",
         help="path to config file",
     )
-    parser.add_argument("--masks_path", help="path to the mask folder.")
-    parser.add_argument("--images_path", help="path to the image folder.")
+    parser.add_argument("--masks-path", nargs="+",help="path to the mask folder.")
+    parser.add_argument("--images-path",nargs="+", help="path to the image folder.")
     parser.add_argument("--input", nargs="+", help="using pandas read the csv file ")
-    parser.add_argument(
-        "--output",
-        help="A file or directory to save output visualizations. "
-        "If not given, will show output in an OpenCV window.",
-    )
 
     parser.add_argument(
         "--confidence-threshold",
@@ -77,13 +74,15 @@ if __name__ == "__main__":
     cfg = setup_cfg(args)
 
     demo = VisualizationDemo(cfg)
-
+    #model=torch.load('/content/drive/MyDrive/ReID/siam-tr-model.pt').cuda()
     if args.input:
         df=pd.read_csv(args.input[0])
-        img_path=args.images_path[0]
-        msk_path=args.mask_path[0]
-
+        img_path="/content/drive/MyDrive/ReID/Samples/UFPR"
+        msk_path="/content/drive/MyDrive/ReID/Samples/UFPR"
+        model=fetch_symmetry_model("/content/drive/MyDrive/ReID/siam-tr-state-dict.pt")
         acc_score,char_error=evaluate_without_siamese(df,img_path,msk_path,demo)
-        print(acc_score,char_error)
+        print("accuracy and cer without symmetry",acc_score,char_error)
+        print("accuracy and cer with symmetry",evaluate_with_siames(df,img_path,msk_path,demo,model))
+
 
         

@@ -11,6 +11,16 @@ def read_image(path):
     img=cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
     return img
 
+def compare_metric(preds,label):
+    maxx=0
+    res=""
+    for strs in preds:
+        score=TED_similarity_score(strs,label)
+        if score>=maxx:
+            maxx=score
+            res=strs
+    return maxx,res
+
 def evaluate_without_siamese(df,img_path,mask_path,model):
     """
     input args: takes dataframe as the input
@@ -26,11 +36,11 @@ def evaluate_without_siamese(df,img_path,mask_path,model):
         img=read_image(img_pth)
         res=extract_license_UFPR_plate_number(mask_pth)
         #using spts model
-        preds=model.run_on_image(img)
-
+        preds,recog=model.run_on_image(img)
+        
         #pred_sample_don.append(gen_tex)
-        p,gen_tex=compare_metric(preds,res)
-
+        p,gen_tex=compare_metric(recog,res)
+        #print(recog,res,p)
         ted+=p
         cer+=charm([res],[gen_tex])
     #print("percetage of correct is:",correct/len(df))
@@ -41,11 +51,14 @@ def evaluate_with_siames(df,img_path,mask_path,model1,model2):
     """
     input args: takes dataframe as the input
     returns accuracy,character error rate(CER)
+    model1 is inference
+    model2 is for symmetry
     """
     ted=0 #tree-distance to calculate the accuracy
     cer=0
     m=0
     f=0
+    model2=model2.cuda()
     for i in range(len(df)):
         img_pth=os.path.join(img_path,df["file"][i])
         mask_pth=os.path.join(mask_path,df["masks"][i])
@@ -73,13 +86,9 @@ def evaluate_with_siames(df,img_path,mask_path,model1,model2):
                 if y>=m:
                     charc=b
                     m=y
-            #print(a,y)
 
-        if m==1.0:
-            #print(charc)
-            f=f+1
-
-        print(m)
+        #print(m)
+        #print(charc,res,m)
         ted=ted+m
         if res and charc:
         #print(charc,res)

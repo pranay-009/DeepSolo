@@ -2,6 +2,7 @@ from PIL import Image
 from timm.models.layers import DropPath, to_2tuple, trunc_normal_
 #from transformers import DonutProcessor, VisionEncoderDecoderModel
 import os
+import timm
 import numpy as np
 import pandas as pd
 import cv2
@@ -627,3 +628,9 @@ class SwinTransformer(nn.Module):
         flops += self.num_features * self.patches_resolution[0] * self.patches_resolution[1] // (2 ** self.num_layers)
         flops += self.num_features * self.num_classes
         return flops
+
+def fetch_symmetry_model(path):
+    model=SwinTransformer()
+    model.load_state_dict(torch.load(path))
+    #model=torch.load(path).cuda()
+    return model

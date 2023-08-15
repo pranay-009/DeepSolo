@@ -11,8 +11,8 @@ transform = transforms.ToPILImage()
 
 def Text_generation(img,infer_model):
 
-    pred=infer_model.run_on_image(img)
-    return pred["predictions"][0]["texts"]
+    pred,recog=infer_model.run_on_image(img)
+    return recog
 
 
 def joinimages(image_list,patch_height,patch_width):
