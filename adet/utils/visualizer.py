@@ -32,9 +32,25 @@ class TextVisualizer(Visualizer):
         recs = predictions.recs
         bd_pts = np.asarray(predictions.bd)
 
-        self.overlay_instances(ctrl_pnts, scores, recs, bd_pts)
+        lst=self.overlay_instances(ctrl_pnts, scores, recs, bd_pts)
 
         return self.output
+    def show_instance_predictions(self,predictions):
+        ctrl_pnts = predictions.ctrl_points.numpy()
+        scores = predictions.scores.tolist()
+        recs = predictions.recs
+        bd_pts = np.asarray(predictions.bd)
+        recogs=self.instances_predictions(ctrl_pnts, scores, recs, bd_pts)
+        return recogs
+
+    def instances_predictions(self, ctrl_pnts, scores, recs, bd_pnts, alpha=0.4):
+        list_recs=[]
+        for ctrl_pnt, score, rec, bd in zip(ctrl_pnts, scores, recs, bd_pnts):
+            text = self._ctc_decode_recognition(rec)
+            if self.voc_size == 37:
+                text = text.upper()
+            list_recs.append(text)
+        return list_recs
 
     def _process_ctrl_pnt(self, pnt):
         points = pnt.reshape(-1, 2)
@@ -60,7 +76,7 @@ class TextVisualizer(Visualizer):
     def overlay_instances(self, ctrl_pnts, scores, recs, bd_pnts, alpha=0.4):
         colors = [(0,0.5,0),(0,0.75,0),(1,0,1),(0.75,0,0.75),(0.5,0,0.5),(1,0,0),(0.75,0,0),(0.5,0,0),
         (0,0,1),(0,0,0.75),(0.75,0.25,0.25),(0.75,0.5,0.5),(0,0.75,0.75),(0,0.5,0.5),(0,0.3,0.75)]
-
+        #list_recogs=[]
         for ctrl_pnt, score, rec, bd in zip(ctrl_pnts, scores, recs, bd_pnts):
             color = random.choice(colors)
 
@@ -89,6 +105,7 @@ class TextVisualizer(Visualizer):
             if self.voc_size == 37:
                 text = text.upper()
             # text = "{:.2f}: {}".format(score, text)
+            #list_recogs.append(text)
             text = "{}".format(text)
             lighter_color = self._change_color_brightness(color, brightness_factor=0)
             if bd is not None:

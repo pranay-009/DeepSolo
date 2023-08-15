@@ -80,10 +80,12 @@ class VisualizationDemo(object):
                     predictions["sem_seg"].argmax(dim=0).to(self.cpu_device))
             if "instances" in predictions:
                 instances = predictions["instances"].to(self.cpu_device)
-                vis_output = visualizer.draw_instance_predictions(predictions=instances)
+                #vis_output= visualizer.draw_instance_predictions(predictions=instances)
+                recog=visualizer.show_instance_predictions(predictions=instances)
 
-        return predictions, vis_output
 
+        return predictions,recog
+    
     def _frame_from_video(self, video):
         while video.isOpened():
             success, frame = video.read()
