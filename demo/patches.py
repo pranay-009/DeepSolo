@@ -11,7 +11,7 @@ transform = transforms.ToPILImage()
 
 def Text_generation(img,infer_model):
 
-    pred=infer_model(img)
+    pred=infer_model.run_on_image(img)
     return pred["predictions"][0]["texts"]
 
 

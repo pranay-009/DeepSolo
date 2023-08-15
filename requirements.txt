@@ -18,3 +18,5 @@ tqdm==4.53.0
 zss
 tree-distance
 patchify
+torchmetrics
+jiwer

@@ -3,12 +3,17 @@ import glob
 import multiprocessing as mp
 import os
 import time
+import pandas as pd
 import cv2
 import tqdm
-from symmetry import *
+f#rom symmetry import *
 from detectron2.data.detection_utils import read_image
 from detectron2.utils.logger import setup_logger
-
+from extract import *
+from symmetry import *
+from patches import  *
+from metrics import *
+from testing import *
 from predictor import VisualizationDemo
 from adet.config import get_cfg
 
@@ -39,9 +44,9 @@ def get_parser():
         metavar="FILE",
         help="path to config file",
     )
-    parser.add_argument("--webcam", action="store_true", help="Take inputs from webcam.")
-    parser.add_argument("--video-input", help="Path to video file.")
-    parser.add_argument("--input", nargs="+", help="A list of space separated input images")
+    parser.add_argument("--masks_path", help="path to the mask folder.")
+    parser.add_argument("--images_path", help="path to the image folder.")
+    parser.add_argument("--input", nargs="+", help="using pandas read the csv file ")
     parser.add_argument(
         "--output",
         help="A file or directory to save output visualizations. "
@@ -74,16 +79,11 @@ if __name__ == "__main__":
     demo = VisualizationDemo(cfg)
 
     if args.input:
-        if os.path.isdir(args.input[0]):
-            args.input = [os.path.join(args.input[0], fname) for fname in os.listdir(args.input[0])]
-        elif len(args.input) == 1:
-            args.input = glob.glob(os.path.expanduser(args.input[0]))
-            assert args.input, "The input path(s) was not found"
-        for path in tqdm.tqdm(args.input, disable=not args.output):
-            # use PIL, to be consistent with evaluation
-            img = read_image(path, format="BGR")
-            start_time = time.time()
-            predictions, recognitions= demo.run_on_image(img)
-            print(recognitions)
+        df=pd.read_csv(args.input[0])
+        img_path=args.images_path[0]
+        msk_path=args.mask_path[0]
 
-    
+        acc_score,char_error=evaluate_without_siamese(df,img_path,msk_path,demo)
+        print(acc_score,char_error)
+
+        
